@@ -28,30 +28,36 @@ void Thread::thread_exit(int exit_code) {
     // Thread::thread_count --; // Implementar no dispatcher
     
 }
-
+// t1(f1)
+// t2(f2)
+// f1: t2->join()
+// Quem executou o join foi a thread que estava rodando,
+// Mas o objeto que executou foi da thread que vamos esperar
+// Retornar o código de thread exit
 int Thread::join() {
+    //Fazer com que a thread que está rodando espere
+    _running->suspend();
+    _running = this;
+    this->_state = State::RUNNING;
 
+
+    
 }
 
 void Thread::suspend() {
     db<Thread>(TRC) << "Thread iniciou suspensão\n";
 
     this->_state = State::SUSPENDED;
-
     _suspension.insert(&this->_link);
-
-
-
 }
 
 void Thread::resume(){
-
+    db<Thread>(TRC) << "Thread está resumindo\n";
     
     this->_state = State::READY;
 
     _suspension.remove(&this->_link);
-
-
+    _ready.insert(&this->_link);
 }
 
 /*

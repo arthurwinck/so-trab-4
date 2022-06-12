@@ -194,6 +194,7 @@ private:
     Ready_Queue::Element _link;
     //Sus_Queue::Element _linksus adcionar element do queue/
     volatile State _state;
+    volatile int _exit_code;
 
     /*
      * Qualquer outro atributo que você achar necessário para a solução.

@@ -1,0 +1,5 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/bingas/Projects/so-trab-4'
+g++ main.cc cpu.cc cpu.h main_class.h main_class.cc traits.h debug.h debug.cc system.cc system.h thread.h thread.cc list.h  -v -lrt -lpthread -o main
+make: Leaving directory '/home/bingas/Projects/so-trab-4'
+ 
