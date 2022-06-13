@@ -195,6 +195,7 @@ private:
     //Sus_Queue::Element _linksus adcionar element do queue/
     volatile State _state;
     volatile int _exit_code;
+    volatile int _id_waiting;
 
     /*
      * Qualquer outro atributo que você achar necessário para a solução.
@@ -215,6 +216,10 @@ inline Thread::Thread(void (* entry)(Tn ...), Tn ... an) : _link(this, (std::chr
     this->_id = Thread::thread_count ++;
     //Alterar status para ready
     this->_state = State::READY;
+
+    //Essa thread não está em nenhum join no momento, setamos então id_waiting para -1
+    this->_id_waiting = -1;
+
     // Preciso realizar a atribuição de new (?) e adicionar o elemento na fila
     // Inserir a thread na fila de prontos
     if (_id != 0 && _id != 1) { //Thread não é dispatcher e não é main

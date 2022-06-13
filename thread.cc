@@ -21,7 +21,15 @@ void Thread::thread_exit(int exit_code) {
     //Correções - Solução do professor
     this->_state = FINISHING;
     //thread_exit chama o yield
-    Thread::yield();
+    
+    //Retomar a execução da thread que chamou join
+    if (this->_id_waiting >= 0) {
+        // Setar exit_code para id da thread
+        // Mudar a thread para a thread que deu join
+        // Tirar ela da lista de suspensas
+    } else {
+        Thread::yield();
+    }
     
     //
     // delete this->_context;// Implementar no Destrutor da classe
@@ -35,13 +43,9 @@ void Thread::thread_exit(int exit_code) {
 // Mas o objeto que executou foi da thread que vamos esperar
 // Retornar o código de thread exit
 int Thread::join() {
-    //Fazer com que a thread que está rodando espere
+    //Setar id_waiting para a thread que está esperando essa thread finalizar
+    this->_id_waiting = _running->id();
     _running->suspend();
-    _running = this;
-    this->_state = State::RUNNING;
-
-
-    
 }
 
 void Thread::suspend() {
