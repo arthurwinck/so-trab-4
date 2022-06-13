@@ -23,13 +23,15 @@ void Thread::thread_exit(int exit_code) {
     //thread_exit chama o yield
     
     //Retomar a execução da thread que chamou join
-    if (this->_id_waiting >= 0) {
+    if (this->_waiting_bool) {
+        this->_exit_code = this->id();
+        Thread* waiting_thread = Thread::_suspension.remove(&this->_waiting_link)->object();
+        waiting_thread->resume();        
         // Setar exit_code para id da thread
         // Mudar a thread para a thread que deu join
         // Tirar ela da lista de suspensas
-    } else {
-        Thread::yield();
-    }
+    } 
+    Thread::yield();
     
     //
     // delete this->_context;// Implementar no Destrutor da classe
@@ -44,15 +46,19 @@ void Thread::thread_exit(int exit_code) {
 // Retornar o código de thread exit
 int Thread::join() {
     //Setar id_waiting para a thread que está esperando essa thread finalizar
-    this->_id_waiting = _running->id();
+    this->_waiting_link = _running->_link;
+    this->_waiting_bool = 1;
     _running->suspend();
 }
 
 void Thread::suspend() {
     db<Thread>(TRC) << "Thread iniciou suspensão\n";
+    if (this->_state != State::SUSPENDED) {
+        this->_state = State::SUSPENDED;
 
-    this->_state = State::SUSPENDED;
-    _suspension.insert(&this->_link);
+        _suspension.insert(&this->_link);
+    }
+    Thread::yield();
 }
 
 void Thread::resume(){
