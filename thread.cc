@@ -24,9 +24,9 @@ void Thread::thread_exit(int exit_code) {
     
     //Retomar a execução da thread que chamou join
     if (this->_waiting_bool) {
-        this->_exit_code = this->id();
         Thread* waiting_thread = Thread::_suspension.remove(&this->_waiting_link)->object();
-        waiting_thread->resume();        
+        waiting_thread->resume(); 
+        this->_exit_code = exit_code;       
         // Setar exit_code para id da thread
         // Mudar a thread para a thread que deu join
         // Tirar ela da lista de suspensas
@@ -48,7 +48,10 @@ int Thread::join() {
     //Setar id_waiting para a thread que está esperando essa thread finalizar
     this->_waiting_link = _running->_link;
     this->_waiting_bool = 1;
+    this->_exit_code = this->id();
     _running->suspend();
+
+    return this->_exit_code;
 }
 
 void Thread::suspend() {
