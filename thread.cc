@@ -105,6 +105,54 @@ void Thread::init(void (*main)(void *)) {
     CPU::switch_context(&_main_context, _main._context);
 };
 
+void Thread::yield() {
+    db<Thread>(TRC) << "Thread iniciou processo de yield\n";
+    Thread * prev = Thread::_running;
+    Thread * next = Thread::_ready.remove()->object();
+
+
+    //Correções
+    // Atualiza a prioridade de prev com timestamp se n for a main
+    if(prev != &_main && prev != (&_dispatcher) && prev->_state != FINISHING) {
+        prev->_state = READY;
+        int now = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+        prev->_link.rank(now);
+        db<Thread>(TRC) << "ID da Thread com timestamp atualizado:" << (*prev).id() << "\n";
+    }
+
+    if (prev != &_main) {
+        _ready.insert(&prev->_link);
+    }
+
+    // Muda o ponteiro running para a próxima thread
+    _running = next;
+
+    // Muda o estado da próxima thread 
+    next->_state = RUNNING;
+
+    switch_context(prev, next);
+}
+
+int Thread::switch_context(Thread * prev, Thread * next) {
+    db<Thread>(TRC) << "Trocando contexto Thread::switch_context()\n";
+    if (prev != next) {
+        //UPDATE: ORDEM ERRADA, primeiro se troca o _running depois executa switch_context (UPDATE: Fazemos isso em yield())
+        // Se for feito do jeito inverso, quando chega em switch_context o código n executa mais 
+        int result = CPU::switch_context(prev->_context, next->_context);
+        
+        // Se eu não conseguir realizar switch_context da CPU, aviso que deu ruim
+        if (result) {
+            return 0;
+        } else {
+            return -1;
+        }
+
+    } else {
+        return -1;
+    }
+}
+
+
 
 
 void Thread::dispatcher() {
